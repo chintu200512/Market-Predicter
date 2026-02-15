@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Calculator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --gold: #FFD700;
+            --dark-gold: #D4AF37;
+            --black: #121212;
+            --dark-gray: #1E1E1E;
+            --light-gray: #2D2D2D;
+        }
+        body {
+            background-color: var(--black);
+            color: var(--gold);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .navbar {
+            background-color: var(--black) !important;
+            border-bottom: 2px solid var(--gold);
+            padding: 0.5rem 1rem;
+        }
+        .navbar-brand {
+            color: var(--gold) !important;
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+        .nav-container {
+            display: flex;
+            width: 100%;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+        .nav-link {
+            color: var(--gold) !important;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .nav-link:hover {
+            background-color: rgba(255, 215, 0, 0.1);
+            color: var(--dark-gold) !important;
+        }
+        .nav-link.active {
+            background-color: rgba(255, 215, 0, 0.2);
+            font-weight: 600;
+        }
+        .nav-link i {
+            font-size: 1.1rem;
+        }
+        .navbar-text {
+            color: var(--gold) !important;
+        }
+        .container.py-5 {
+            padding-top: 2rem;
+            padding-bottom: 3rem;
+        }
+        h1 {
+            color: var(--gold);
+            border-bottom: 2px solid var(--dark-gold);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .card {
+            background-color: var(--dark-gray);
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        .card-header {
+            background-color: var(--light-gray) !important;
+            border-bottom: 1px solid var(--gold);
+            font-weight: 600;
+        }
+        .form-label {
+            font-weight: 500;
+            color: var(--gold);
+        }
+        .form-control, .form-select {
+            background-color: var(--light-gray);
+            border: 1px solid var(--gold);
+            color: var(--gold);
+        }
+        .form-control:focus, .form-select:focus {
+            background-color: var(--light-gray);
+            border-color: var(--dark-gold);
+            color: var(--gold);
+            box-shadow: 0 0 0 0.25rem rgba(212, 175, 55, 0.25);
+        }
+        .btn-primary {
+            background-color: var(--dark-gold);
+            border-color: var(--gold);
+            color: var(--black);
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .btn-primary:hover {
+            background-color: var(--gold);
+            border-color: var(--dark-gold);
+            color: var(--black);
+            transform: translateY(-2px);
+        }
+        .btn-outline-light {
+            color: var(--gold);
+            border-color: var(--gold);
+            transition: all 0.3s;
+        }
+        .btn-outline-light:hover {
+            background-color: var(--gold);
+            color: var(--black);
+        }
+        .list-group-item {
+            background-color: var(--dark-gray);
+            border: 1px solid var(--light-gray);
+            color: var(--gold);
+            transition: all 0.3s;
+        }
+        .list-group-item:hover {
+            background-color: var(--light-gray);
+        }
+        .calculation-details {
+            background-color: var(--dark-gray);
+            border: 1px solid var(--gold);
+            border-radius: 5px;
+        }
+        .table {
+            color: var(--gold);
+        }
+        .table th, .table td {
+            border-color: var(--light-gray);
+        }
+        .alert {
+            border: 1px solid transparent;
+        }
+        .chart-container {
+            height: 400px;
+            margin-bottom: 30px;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        @media (max-width: 768px) {
+            .nav-links {
+                gap: 0.8rem;
+            }
+            .nav-link {
+                padding: 0.5rem;
+                font-size: 0.9rem;
+            }
+            .nav-link i {
+                font-size: 1rem;
+            }
+            .row {
+                flex-direction: column;
+            }
+            .col-md-4, .col-md-8 {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('home') }}">Market-Mentor</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="nav-container">
+                    <div class="nav-links">
+                        <a class="nav-link" href="{{ url_for('home') }}"><i class="fas fa-home"></i> Home</a>
+                        <a class="nav-link" href="{{ url_for('support') }}"><i class="fas fa-headset"></i> Support</a>
+                        <a class="nav-link" href="{{ url_for('about') }}"><i class="fas fa-info-circle"></i> About-Site </a>
+                    </div>
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <span class="navbar-text me-3">Hello, {{ username }}</span>
+                        </li>
+                                         </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <h1 class="mb-4">Stock Calculator</h1>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Calculator</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="{{ url_for('calculator') }}">
+                            {{ form.hidden_tag() }}
+                            <div class="mb-3">
+                                <label for="symbol" class="form-label">Stock Symbol</label>
+                                <select class="form-select" id="symbol" name="symbol" required>
+                                    <option value="">Select a stock</option>
+                                    {% for stock in stock_list %}
+                                        <option value="{{ stock }}" {% if form.symbol.data == stock %}selected{% endif %}>{{ stock }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Operation</label>
+                                <div class="list-group">
+                                    {% for op_key, op_data in operations.items() %}
+                                        <label class="list-group-item">
+                                            <input class="form-check-input me-1" type="radio" name="operation" value="{{ op_key }}" 
+                                                   {% if form.operation.data == op_key %}checked{% endif %} required>
+                                            <strong>{{ op_data[0] }}</strong>
+                                            <small class="d-block text-muted">{{ op_data[1] }}</small>
+                                        </label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <!-- Dynamic fields based on operation -->
+                            <div id="cagr-fields" class="mb-3" style="display: none;">
+                                <label for="years" class="form-label">Years</label>
+                                <input type="number" class="form-control" id="years" name="years" 
+                                       value="{{ form.years.data if form.years.data else 5 }}" step="0.1" min="0.1">
+                            </div>
+                            <div id="returns-fields" class="mb-3" style="display: none;">
+                                <label for="timeframe" class="form-label">Timeframe</label>
+                                <select class="form-select" id="timeframe" name="timeframe">
+                                    <option value="daily" {% if form.timeframe.data == 'daily' %}selected{% endif %}>Daily</option>
+                                    <option value="weekly" {% if form.timeframe.data == 'weekly' %}selected{% endif %}>Weekly</option>
+                                    <option value="monthly" {% if form.timeframe.data == 'monthly' %}selected{% endif %}>Monthly</option>
+                                </select>
+                            </div>
+                            <div id="moving-avg-fields" class="mb-3" style="display: none;">
+                                <div class="row">
+                                    <div class="col">
+                                        <label for="short_window" class="form-label">Short Window (days)</label>
+                                        <input type="number" class="form-control" id="short_window" name="short_window" 
+                                               value="{{ form.short_window.data if form.short_window.data else 50 }}" min="1">
+                                    </div>
+                                    <div class="col">
+                                        <label for="long_window" class="form-label">Long Window (days)</label>
+                                        <input type="number" class="form-control" id="long_window" name="long_window" 
+                                               value="{{ form.long_window.data if form.long_window.data else 200 }}" min="1">
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100 mt-3">Calculate</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                {% if result %}
+                    <div class="card mb-4">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">Result</h5>
+                        </div>
+                        <div class="card-body">
+                            <h2 class="text-center mb-4">{{ result }}</h2>
+                            {% if calculation_details %}
+                                <div class="calculation-details mb-4">
+                                    <h5>Calculation Details</h5>
+                                    <table class="table table-sm">
+                                        {% for key, value in calculation_details.items() %}
+                                            <tr>
+                                                <th>{{ key }}</th>
+                                                <td>{{ value }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </table>
+                                </div>
+                            {% endif %}
+                            {% if chart %}
+                                <div class="chart-container">
+                                    {{ chart|safe }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Show/hide operation-specific fields
+        document.addEventListener('DOMContentLoaded', function() {
+            const operationRadios = document.querySelectorAll('input[name="operation"]');
+            function toggleFields() {
+                const selectedOp = document.querySelector('input[name="operation"]:checked').value;
+                document.getElementById('cagr-fields').style.display = 'none';
+                document.getElementById('returns-fields').style.display = 'none';
+                document.getElementById('moving-avg-fields').style.display = 'none';
+                if (selectedOp === 'cagr') {
+                    document.getElementById('cagr-fields').style.display = 'block';
+                } else if (selectedOp === 'returns') {
+                    document.getElementById('returns-fields').style.display = 'block';
+                } else if (selectedOp === 'moving_avg') {
+                    document.getElementById('moving-avg-fields').style.display = 'block';
+                }
+            }
+            if (document.querySelector('input[name="operation"]:checked')) {
+                toggleFields();
+            }
+            operationRadios.forEach(radio => {
+                radio.addEventListener('change', toggleFields);
+            });
+        });
+    </script>
+</body>
+</html>
