@@ -24,7 +24,6 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'my_super_secret_key_123'
 
 # THEN enable CSRF
-csrf = CSRFProtect(app)
 
 
 
@@ -561,4 +560,5 @@ def support():
 
 if __name__=="__main__":
     app.run(host="0.0.0.0",port=5000, debug=True)
+
 
