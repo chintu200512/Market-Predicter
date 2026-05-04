@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
-    <title>MARKET-MENTOR | AI Stock Predictor</title>
+    <title>MARKET-MENTOR</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- Load Plotly JS -->
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <style>    
-        /* ===== ORIGINAL STYLES PRESERVED ===== */
+ <style>    
+     
         body {
             background-color: #0a0a0a;
             color: #E0E0E0;
@@ -17,18 +17,14 @@
             min-height: 100vh;
             line-height: 1.6;
             background-image: radial-gradient(circle at 10% 20%, rgba(255,215,0,0.03) 0%, rgba(255,215,0,0.01) 90%);
-            overflow-x: hidden;
         }
         
-        /* Navigation Bar - MODIFIED for hamburger */
+        /* Navigation Bar */
         .navbar {
             background: linear-gradient(135deg, rgb(110, 110, 109) 0%, #000000 100%);
             box-shadow: 0 4px 20px rgba(255, 215, 0, 0.1);
             padding: 0.8rem 1rem;
             border-bottom: 1px solid rgba(255, 215, 0, 0.2);
-            position: sticky;
-            top: 0;
-            z-index: 1050;
         }
         
         .navbar-brand {
@@ -53,142 +49,20 @@
             transform: rotate(-15deg);
         }
         
-        /* Hamburger Button */
-        .hamburger-btn {
-            background: rgba(255, 215, 0, 0.1);
-            border: 1px solid rgba(255, 215, 0, 0.3);
-            border-radius: 8px;
-            padding: 8px 12px;
-            color: gold;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .hamburger-btn:hover {
-            background: rgba(255, 215, 0, 0.2);
-            transform: scale(1.02);
-        }
-        
-        /* Welcome message in navbar */
-        .welcome-message {
-            color: rgba(255, 215, 0, 0.8);
-            margin-right: 1rem;
-            font-weight: 500;
-            white-space: nowrap;
-        }
-        
-        /* ===== SIDEBAR (Zerodha style - hidden by default on mobile) ===== */
-        .mobile-sidebar {
-            position: fixed;
-            top: 0;
-            left: -280px;
-            width: 280px;
-            height: 100%;
-            background: linear-gradient(180deg, #0F0F15 0%, #08080C 100%);
-            border-right: 1px solid rgba(255, 215, 0, 0.25);
-            z-index: 1200;
-            transition: left 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-            padding: 1.5rem 1rem;
-            overflow-y: auto;
-            box-shadow: 4px 0 25px rgba(0, 0, 0, 0.6);
-        }
-        .mobile-sidebar.open {
-            left: 0;
-        }
-        .sidebar-header {
-            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
-            padding-bottom: 1rem;
-            margin-bottom: 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .sidebar-header h5 {
-            color: gold;
-            margin: 0;
-            font-weight: 700;
-        }
-        .close-sidebar {
-            background: rgba(255,215,0,0.1);
-            border: none;
-            color: gold;
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            transition: 0.2s;
-        }
-        .close-sidebar:hover {
-            background: rgba(255,215,0,0.3);
-        }
-        .sidebar-nav {
-            list-style: none;
-            padding: 0;
-        }
-        .sidebar-nav li {
-            margin-bottom: 0.8rem;
-        }
-        .sidebar-nav a {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 0.7rem 1rem;
-            border-radius: 12px;
-            color: #e0e0e0;
-            text-decoration: none;
-            transition: all 0.2s;
-            font-weight: 500;
-        }
-        .sidebar-nav a i {
-            width: 24px;
-            color: gold;
-        }
-        .sidebar-nav a:hover, .sidebar-nav a.active {
-            background: rgba(255, 215, 0, 0.12);
-            color: gold;
-            transform: translateX(4px);
-        }
-        .sidebar-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(3px);
-            z-index: 1150;
-            display: none;
-        }
-        .sidebar-overlay.active {
-            display: block;
-        }
-        
-        /* Original Nav Links - hidden on mobile, shown in sidebar */
-        .desktop-nav-links {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        @media (max-width: 768px) {
-            .desktop-nav-links {
-                display: none;
-            }
-        }
-        
-        /* Original nav-link style preserved */
         .nav-link {
             padding: 0.5rem 1rem;
             margin: 0 0.2rem;
             border-radius: 6px;
             transition: all 0.3s ease;
             color: rgba(255, 255, 255, 0.8);
-            text-decoration: none;
         }
+        
         .nav-link:hover {
             background-color: rgba(255, 215, 0, 0.1);
             transform: translateY(-2px);
             color: gold !important;
         }
+        
         .nav-link i {
             margin-right: 5px;
         }
@@ -334,7 +208,7 @@
             100% { transform: scale(1); }
         }
         
-        /* Chart Containers */
+        /* Chart Containers - IMPROVED FOR MOBILE */
         .chart-card {
             background-color: #121212;
             border: 1px solid rgba(255, 215, 0, 0.1);
@@ -407,319 +281,372 @@
             border-color: gold !important;
         }
         
-        /* Responsive Adjustments */
+        /* ===== ENHANCED MOBILE RESPONSIVE ADJUSTMENTS ===== */
         @media (max-width: 768px) {
+            /* Navigation */
+            .navbar-collapse {
+                padding-top: 1rem;
+            }
+            
+            .nav-link {
+                margin: 0.2rem 0;
+                padding: 0.5rem;
+            }
+            
+            /* Chart containers - better mobile height and touch-friendly */
             .chart-card-body {
-                height: 300px;
+                height: 280px;
             }
-            .navbar {
-                padding: 0.6rem 0.8rem;
+            
+            /* Cards spacing */
+            .card {
+                margin-bottom: 16px;
             }
+            
+            .card-header {
+                padding: 0.75rem 1rem;
+            }
+            
+            .card-header h5 {
+                font-size: 1rem;
+            }
+            
+            /* Form rows stack on mobile */
+            .row.g-3 {
+                --bs-gutter-y: 1rem;
+            }
+            
+            /* Button full width on mobile */
+            .col-md-2.d-flex.align-items-end {
+                margin-top: 0.5rem;
+            }
+            
+            /* Price display */
+            .display-6 {
+                font-size: 2rem;
+            }
+            
+            /* Table responsive - better scrolling */
+            .table-responsive {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            /* Container padding */
+            .container-fluid {
+                padding-left: 12px;
+                padding-right: 12px;
+            }
+            
+            /* Welcome message smaller on mobile */
+            .welcome-message {
+                font-size: 0.8rem;
+            }
+            
+            /* Navbar brand */
             .navbar-brand {
                 font-size: 1.2rem;
             }
-            .welcome-message {
-                font-size: 0.8rem;
-                margin-right: 0.5rem;
+        }
+        
+        /* Extra small devices (phones, 480px and down) */
+        @media (max-width: 480px) {
+            .chart-card-body {
+                height: 240px;
             }
-            .container-fluid {
-                padding-left: 0.8rem;
-                padding-right: 0.8rem;
+            
+            .display-6 {
+                font-size: 1.75rem;
+            }
+            
+            .card-header h5 {
+                font-size: 0.9rem;
+            }
+            
+            .card-header i {
+                font-size: 0.9rem;
+            }
+            
+            .form-label {
+                font-size: 0.85rem;
+            }
+            
+            .form-control, .form-select {
+                padding: 0.6rem 0.8rem;
+                font-size: 0.85rem;
+            }
+            
+            .btn-primary {
+                padding: 0.5rem 1rem;
+                font-size: 0.85rem;
+            }
+            
+            .table th, .table td {
+                padding: 0.5rem;
+                font-size: 0.8rem;
+            }
+        }
+        
+        /* Landscape mode optimization */
+        @media (max-width: 900px) and (orientation: landscape) {
+            .chart-card-body {
+                height: 220px;
             }
         }
         
         /* Special Elements */
+        .welcome-message {
+            color: rgba(255, 215, 0, 0.8);
+            margin-right: 1rem;
+            font-weight: 500;
+        }
+        
         .stock-change-animation {
             animation: fadeIn 1s ease-in;
         }
-    </style>
+      
+        
+</style>
+<!-- Additional script to make Plotly graphs responsive on mobile -->
+<script>
+    // Function to make all Plotly graphs responsive on window resize
+    document.addEventListener('DOMContentLoaded', function() {
+        // Wait for Plotly to be fully loaded and graphs to render
+        setTimeout(function() {
+            // Find all Plotly graph divs and make them responsive
+            var plotlyDivs = document.querySelectorAll('.js-plotly-plot, .plotly-graph-div');
+            plotlyDivs.forEach(function(div) {
+                // Set responsive configuration
+                if (div._fullLayout) {
+                    Plotly.relayout(div.id, {
+                        'autosize': true,
+                        'margin.l': 40,
+                        'margin.r': 20,
+                        'margin.t': 50,
+                        'margin.b': 40
+                    });
+                }
+            });
+        }, 500);
+        
+        // Also handle window resize for responsive graphs
+        window.addEventListener('resize', function() {
+            var plotlyDivs = document.querySelectorAll('.js-plotly-plot, .plotly-graph-div');
+            plotlyDivs.forEach(function(div) {
+                if (div._fullLayout) {
+                    Plotly.relayout(div.id, {
+                        'autosize': true
+                    });
+                }
+            });
+        });
+    });
+</script>
 </head>
 <body>
-
-<!-- Sidebar Overlay -->
-<div class="sidebar-overlay" id="sidebarOverlay"></div>
-
-<!-- Mobile Sidebar (Zerodha style - hidden by default) -->
-<div class="mobile-sidebar" id="mobileSidebar">
-    <div class="sidebar-header">
-        <h5><i class="fas fa-chart-line"></i> Menu</h5>
-        <button class="close-sidebar" id="closeSidebarBtn"><i class="fas fa-times"></i></button>
-    </div>
-    <ul class="sidebar-nav">
-        <li><a href="#" class="active"><i class="fas fa-chart-line"></i> Predict</a></li>
-        <li><a href="#"><i class="fas fa-calculator"></i> Calculator</a></li>
-        <li><a href="#"><i class="fas fa-info-circle"></i> About-Site</a></li>
-        <li><a href="#"><i class="fas fa-headset"></i> Support</a></li>
-    </ul>
-    <div class="user-info-sidebar mt-4 pt-3 border-top border-secondary">
-        <div><i class="fas fa-user-circle"></i> Welcome, user!</div>
-        <div class="small text-muted mt-2"><i class="fas fa-shield-alt"></i> Secure Analysis</div>
-    </div>
-</div>
-
 <header>
-    <nav class="navbar navbar-expand-lg navbar-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark mb-4">
         <div class="container-fluid">
-            <button class="hamburger-btn d-lg-none" id="hamburgerBtn">
-                <i class="fas fa-bars"></i>
-            </button>
             <a class="navbar-brand" href="{{ url_for('home') }}">
                 <i class="fas fa-chart-line"></i> MARKET-MENTOR
             </a>
-            <div class="desktop-nav-links">
+            <div class="d-flex align-items-center">
                 <span class="welcome-message">
                     <i class="fas fa-user-circle"></i> Welcome, user!
                 </span>
-                <a class="nav-link" href="{{ url_for('calculator') }}"><i class="fas fa-calculator"></i> Calculator</a>
-                <a class="nav-link" href="{{ url_for('about') }}"><i class="fas fa-info-circle"></i> About-Site</a>
+            
+               <a class="nav-link" href="{{ url_for('calculator') }}"><i class="fas fa-headset"></i> Calculator </a>
+                <a class="nav-link" href="{{ url_for('about') }}"><i class="fas fa-info-circle"></i> About-Site </a>
                 <a class="nav-link" href="{{ url_for('support') }}"><i class="fas fa-headset"></i> Support</a>
+        
+            
             </div>
-            <!-- Mobile welcome only -->
-            <span class="welcome-message d-lg-none">
-                <i class="fas fa-user-circle"></i>
-            </span>
         </div>
     </nav>
 </header>
-
-<div class="container-fluid">
-    <!-- Flash Messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="alert alert-{{ category }} alert-dismissible fade show">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-
-    <!-- Stock Selection Form -->
-    <div class="card">
-        <div class="card-header">
-            <h5><i class="fas fa-search"></i> Select Stock for Analysis</h5>
-        </div>
-        <div class="card-body">
-            <form method="POST" action="{{ url_for('predict') }}">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label for="stock" class="form-label">Select Stock</label>
-                        <select class="form-select" id="stock" name="stock" required>
-                            <option value="">-- Select a stock --</option>
-                            {% for stock in stocks %}
-                                <option value="{{ stock }}" 
-                                    {% if selected_stock == stock %}selected{% endif %}>
-                                    {{ stock }}
-                                </option>
-                            {% endfor %}
-                        </select>
+    <div class="container-fluid">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
-                    <div class="col-md-4">
-                        <label for="days" class="form-label">Days to Predict</label>
-                        <input type="number" class="form-control" id="days" name="days" value="10" min="1" max="30" required>
-                    </div>
-                    <div class="col-md-2 d-flex align-items-end">
-                        <button type="submit" class="btn btn-primary w-100">Predict</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
 
-    {% if selected_stock %}
-    <!-- Current Price and Main Chart -->
-    <div class="row mb-4">
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-body text-center">
-                    <h5 class="card-title">Current Price</h5>
-                    <p class="card-text display-6 price-highlight">₹{{ "%.2f"|format(current_price) }}</p>
-                    <p class="text-muted stock-change-animation">{{ selected_stock }}</p>
-                </div>
+        <!-- Stock Selection Form -->
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-search"></i> Select Stock for Analysis</h5>
             </div>
-        </div>
-        <div class="col-md-8">
-            <div class="card chart-card">
-                <div class="card-header">
-                    <h5><i class="fas fa-chart-candlestick"></i> Candlestick Chart (Last 30 Days)</h5>
-                </div>
-                <div class="card-body chart-card-body">
-                    <div class="chart-container">
-                        {{ candlestick|safe }}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('predict') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
 
-    <!-- Historical Data Row -->
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <div class="card chart-card">
-                <div class="card-header">
-                    <h5><i class="fas fa-chart-line"></i> Historical Price</h5>
-                </div>
-                <div class="card-body chart-card-body">
-                    <div class="chart-container">
-                        {{ historical|safe }}
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card chart-card">
-                <div class="card-header">
-                    <h5><i class="fas fa-chart-bar"></i> Trading Volume</h5>
-                </div>
-                <div class="card-body chart-card-body">
-                    <div class="chart-container">
-                        {{ volume|safe }}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Moving Average -->
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <div class="card chart-card">
-                <div class="card-header">
-                    <h5><i class="fas fa-chart-area"></i> Moving Average (50-day)</h5>
-                </div>
-                <div class="card-body chart-card-body">
-                    <div class="chart-container">
-                        {{ moving_avg|safe }}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Prediction Results -->
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card chart-card">
-                <div class="card-header">
-                    <h5><i class="fas fa-project-diagram"></i> Price Prediction</h5>
-                </div>
-                <div class="card-body chart-card-body">
-                    <div class="chart-container">
-                        {{ prediction|safe }}
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5><i class="fas fa-table"></i> Prediction Details</h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Price (₹)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for date, price in predictions %}
-                                <tr>
-                                    <td>{{ date }}</td>
-                                    <td>{{ "%.2f"|format(price) }}</td>
-                                </tr>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="stock" class="form-label">Select Stock</label>
+                            <select class="form-select" id="stock" name="stock" required>
+                                <option value="">-- Select a stock --</option>
+                                {% for stock in stocks %}
+                                    <option value="{{ stock }}" 
+                                        {% if selected_stock == stock %}selected{% endif %}>
+                                        {{ stock }}
+                                    </option>
                                 {% endfor %}
-                            </tbody>
-                        </table>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="days" class="form-label">Days to Predict</label>
+                            <input type="number" class="form-control" id="days" name="days" value="10" min="1" max="30" required>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">Predict</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {% if selected_stock %}
+        <!-- Current Price and Main Chart -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Current Price</h5>
+                        <p class="card-text display-6 price-highlight">₹{{ "%.2f"|format(current_price) }}</p>
+                        <p class="text-muted stock-change-animation">{{ selected_stock }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="card chart-card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-chart-candlestick"></i> Candlestick Chart (Last 30 Days)</h5>
+                    </div>
+                    <div class="card-body chart-card-body">
+                        <div class="chart-container">
+                            {{ candlestick|safe }}
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    {% endif %}
 
-    <!-- Error Message Display -->
-    {% if error_message %}
-    <div class="alert alert-danger alert-dismissible fade show mt-4">
-        <i class="fas fa-exclamation-triangle"></i> {{ error_message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-    {% endif %}
-</div>
-
-<!-- Footer (matching original) -->
-<div class="footer">
-    <div class="container">
-        <div class="footer-links">
-            <a href="#" class="footer-link">About</a>
-            <a href="#" class="footer-link">Privacy Policy</a>
-            <a href="#" class="footer-link">Terms of Use</a>
-            <a href="{{ url_for(support) }}" class="footer-link">Contact</a>
+        <!-- Historical Data Row -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card chart-card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-chart-line"></i> Historical Price</h5>
+                    </div>
+                    <div class="card-body chart-card-body">
+                        <div class="chart-container">
+                            {{ historical|safe }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card chart-card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-chart-bar"></i> Trading Volume</h5>
+                    </div>
+                    <div class="card-body chart-card-body">
+                        <div class="chart-container">
+                            {{ volume|safe }}
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="copyright">
-            &copy; 2025 MARKET-MENTOR. All rights reserved. | For educational purposes only.
-        </div>
-    </div>
-</div>
 
-<!-- JavaScript Libraries -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
-<script>
+        <!-- Moving Average -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card chart-card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-chart-area"></i> Moving Average (50-day)</h5>
+                    </div>
+                    <div class="card-body chart-card-body">
+                        <div class="chart-container">
+                            {{ moving_avg|safe }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prediction Results -->
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card chart-card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-project-diagram"></i> Price Prediction</h5>
+                    </div>
+                    <div class="card-body chart-card-body">
+                        <div class="chart-container">
+                            {{ prediction|safe }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5><i class="fas fa-table"></i> Prediction Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Price (₹)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for date, price in predictions %}
+                                    <tr>
+                                        <td>{{ date }}</span></tr>
+                                        <td>{{ "%.2f"|format(price) }}</span></tr>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Error Message Display -->
+        {% if error_message %}
+        <div class="alert alert-danger alert-dismissible fade show mt-4">
+            <i class="fas fa-exclamation-triangle"></i> {{ error_message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    <script>
+
     // Get the CSRF token from the meta tag or form input
-    var csrfToken = document.querySelector('input[name="csrf_token"]') ? document.querySelector('input[name="csrf_token"]').value : '';
+    var csrfToken = document.querySelector('input[name="csrf_token"]').value;
     
-    // Note: jQuery not loaded, so using vanilla AJAX setup if needed
-    // (preserve original functionality - no changes to prediction logic)
-    
-    // ========== SIDEBAR LOGIC (Mobile only - Zerodha style) ==========
-    const sidebar = document.getElementById('mobileSidebar');
-    const overlay = document.getElementById('sidebarOverlay');
-    const hamburgerBtn = document.getElementById('hamburgerBtn');
-    const closeSidebarBtn = document.getElementById('closeSidebarBtn');
-    
-    function openSidebar() {
-        if (sidebar) {
-            sidebar.classList.add('open');
-            overlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-    }
-    
-    function closeSidebar() {
-        if (sidebar) {
-            sidebar.classList.remove('open');
-            overlay.classList.remove('active');
-            document.body.style.overflow = '';
-        }
-    }
-    
-    if (hamburgerBtn) {
-        hamburgerBtn.addEventListener('click', openSidebar);
-    }
-    if (closeSidebarBtn) {
-        closeSidebarBtn.addEventListener('click', closeSidebar);
-    }
-    if (overlay) {
-        overlay.addEventListener('click', closeSidebar);
-    }
-    
-    // Close on escape key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && sidebar && sidebar.classList.contains('open')) {
-            closeSidebar();
-        }
-    });
-    
-    // Close sidebar on window resize if screen becomes large
-    window.addEventListener('resize', function() {
-        if (window.innerWidth > 768 && sidebar && sidebar.classList.contains('open')) {
-            closeSidebar();
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrfToken);
+            }
         }
     });
 </script>

@@ -12,7 +12,6 @@ from datetime import datetime, timedelta
 import plotly.graph_objects as go
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_wtf.csrf import CSRFProtect
-
 import os
 from functools import wraps
 
