@@ -556,6 +556,11 @@ def about():
 @app.route('/support')
 def support():
     return render_template('support.html', username=session.get('username'))
+    from flask import send_from_directory
+
+@app.route('/sitemap.xml')
+def sitemap():
+    return send_from_directory('static', 'sitemap.xml')
 
 if __name__=="__main__":
     app.run(host="0.0.0.0",port=5000, debug=True)
