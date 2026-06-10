@@ -557,13 +557,13 @@ def about():
 @app.route('/support')
 def support():
     return render_template('support.html', username=session.get('username'))
-    from flask import send_from_directory
+  
 
 @app.route('/sitemap.xml')
 def sitemap():
     return send_from_directory('static', 'sitemap.xml')
 
-    from flask import send_from_directory
+   
 
 @app.route('/robots.txt')
 def robots():
