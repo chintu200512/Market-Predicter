@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: market-predicter
+
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: market-predicter
+
+  template:
+    metadata:
+      labels:
+        app: market-predicter
+
+    spec:
+      containers:
+      - name: market-predicter
+
+        image: chintu123/market-predicter:v1
+
+        ports:
+        - containerPort: 5000
