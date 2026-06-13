@@ -20,7 +20,7 @@ spec:
       containers:
       - name: market-predicter
 
-        image: chintu123/market-predicter:v1
+        image: chintu06/market-predicter:v1
 
         ports:
         - containerPort: 5000
