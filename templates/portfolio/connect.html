@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <title>Contact · Cloud Operations</title>
+
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700;14..32,800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- AOS -->
+    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #7C4DFF;
+            --secondary: #00E5FF;
+            --neon-glow: rgba(0, 229, 255, 0.3);
+            --dark: #0a0e17;
+            --card-bg: rgba(16, 24, 40, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--dark);
+            color: #E0E0E0;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            cursor: none;
+        }
+
+        /* ===== CUSTOM CURSOR (desktop only) ===== */
+        .custom-cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--secondary);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 99999;
+            transition: all 0.1s ease;
+            mix-blend-mode: difference;
+        }
+        .custom-cursor::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 4px;
+            height: 4px;
+            background: var(--secondary);
+            border-radius: 50%;
+            box-shadow: 0 0 20px var(--secondary);
+        }
+        .cursor-trail {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--secondary);
+            pointer-events: none;
+            z-index: 99998;
+            opacity: 0.3;
+            transition: all 0.05s ease;
+        }
+
+        /* ===== SCROLL PROGRESS ===== */
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--primary));
+            z-index: 99999;
+            transition: width 0.1s;
+            box-shadow: 0 0 20px var(--neon-glow);
+        }
+
+        /* ===== THREE.JS CANVAS ===== */
+        #three-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* ===== SECTION ===== */
+        .section-padding { padding: 80px 0; }
+        .section-title {
+            font-size: 2.4rem;
+            font-weight: 700;
+            margin-bottom: 40px;
+            color: white;
+            position: relative;
+        }
+        .section-title span {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 2px;
+            box-shadow: 0 0 20px var(--neon-glow);
+        }
+
+        /* ===== SIDEBAR NAV (mobile hamburger) ===== */
+        .sidebar-nav {
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 9997;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 14px;
+            color: rgba(255,255,255,0.4);
+            text-decoration: none;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            font-size: 18px;
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+        .sidebar-nav a:hover {
+            background: rgba(0, 229, 255, 0.1);
+            border-color: var(--secondary);
+            color: var(--secondary);
+            transform: translateX(8px) scale(1.1);
+            box-shadow: 0 0 30px rgba(0, 229, 255, 0.15);
+        }
+        .sidebar-nav a.active {
+            background: rgba(0, 229, 255, 0.12);
+            border-color: var(--secondary);
+            color: var(--secondary);
+            box-shadow: 0 0 30px rgba(0, 229, 255, 0.2);
+        }
+        .sidebar-nav a .tooltip-text {
+            display: none;
+            position: absolute;
+            left: 60px;
+            background: rgba(10,14,23,0.95);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            white-space: nowrap;
+            border: 1px solid var(--glass-border);
+        }
+        .sidebar-nav a:hover .tooltip-text {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* ===== GLASS CARDS ===== */
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px) saturate(1.8);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            overflow: hidden;
+            height: 100%;
+        }
+        .glass-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(0, 229, 255, 0.2);
+            box-shadow: 0 20px 60px rgba(0, 229, 255, 0.05);
+        }
+        .glass-card .card-body { padding: 25px 20px; }
+
+        /* ===== FORM ===== */
+        .form-control-glass {
+            background: rgba(255,255,255,0.04) !important;
+            border: 1px solid var(--glass-border) !important;
+            color: white !important;
+            border-radius: 14px !important;
+            padding: 14px 18px !important;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        .form-control-glass:focus {
+            background: rgba(255,255,255,0.08) !important;
+            border-color: var(--secondary) !important;
+            box-shadow: 0 0 30px rgba(0, 229, 255, 0.05) !important;
+            outline: none;
+        }
+        .form-control-glass::placeholder { color: rgba(255,255,255,0.3); font-weight: 300; }
+
+        .btn-glass-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            padding: 14px 32px;
+            border-radius: 50px;
+            font-weight: 600;
+            color: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 30px rgba(0, 229, 255, 0.1);
+            width: 100%;
+        }
+        .btn-glass-primary:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 0 50px rgba(0, 229, 255, 0.2);
+            color: white;
+        }
+
+        /* ===== SOCIAL ICONS ===== */
+        .social-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--glass-border);
+            color: rgba(255,255,255,0.5);
+            transition: all 0.3s ease;
+            font-size: 20px;
+            text-decoration: none;
+        }
+        .social-icon:hover {
+            background: rgba(0, 229, 255, 0.1);
+            border-color: var(--secondary);
+            color: var(--secondary);
+            transform: translateY(-5px);
+            box-shadow: 0 0 30px rgba(0, 229, 255, 0.1);
+        }
+
+        /* ===== PLATFORM SWITCHER ===== */
+        .platform-switcher {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .platform-btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 4px 30px rgba(0,0,0,0.4);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(20px);
+        }
+        .platform-btn.market {
+            background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,107,0,0.2));
+            border: 1px solid rgba(255,215,0,0.2);
+            color: gold;
+        }
+        .platform-btn.portfolio {
+            background: linear-gradient(135deg, rgba(124,77,255,0.2), rgba(0,229,255,0.2));
+            border: 1px solid rgba(0,229,255,0.15);
+            color: var(--secondary);
+        }
+        .platform-btn:hover { transform: translateY(-3px) scale(1.05); }
+
+        /* ===== FOOTER ===== */
+        .glass-footer {
+            background: rgba(10,14,23,0.8);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--glass-border);
+            padding: 30px 0;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 992px) {
+            .sidebar-nav { left: 12px; gap: 8px; }
+            .sidebar-nav a { width: 42px; height: 42px; font-size: 15px; border-radius: 10px; }
+            .sidebar-nav a .tooltip-text { display: none !important; }
+            .section-title { font-size: 2rem; text-align: center; }
+            .section-title::after { left: 50%; transform: translateX(-50%); }
+        }
+
+        @media (max-width: 768px) {
+            .section-padding { padding: 60px 0; }
+            .platform-switcher { bottom: 12px; right: 12px; flex-direction: row; gap: 6px; }
+            .platform-btn { padding: 8px 12px; font-size: 10px; }
+            .sidebar-nav { left: 8px; gap: 5px; }
+            .sidebar-nav a { width: 35px; height: 35px; font-size: 12px; border-radius: 8px; }
+            .custom-cursor, .cursor-trail { display: none !important; }
+            body { cursor: auto; }
+            .glass-card .card-body { padding: 20px 15px; }
+            .social-icon { width: 40px; height: 40px; font-size: 16px; }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar-nav { left: 5px; gap: 4px; }
+            .sidebar-nav a { width: 30px; height: 30px; font-size: 10px; border-radius: 6px; }
+            .section-title { font-size: 1.7rem; }
+            .btn-glass-primary { padding: 12px 20px; font-size: 0.9rem; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Custom Cursor -->
+    <div class="custom-cursor" id="customCursor"></div>
+    <div class="cursor-trail" id="cursorTrail"></div>
+
+    <!-- Scroll Progress -->
+    <div class="scroll-progress" id="scrollProgress"></div>
+
+    <!-- Three.js Starfield -->
+    <div id="three-canvas"></div>
+
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar-nav">
+        <a href="/" title="Home"><i class="fas fa-home"></i><span class="tooltip-text">Home</span></a>
+        <a href="/projects" title="Projects"><i class="fas fa-code"></i><span class="tooltip-text">Projects</span></a>
+        <a href="/skills" title="Skills"><i class="fas fa-tools"></i><span class="tooltip-text">Skills</span></a>
+        <a href="/education" title="Education"><i class="fas fa-graduation-cap"></i><span class="tooltip-text">Education</span></a>
+        <a href="/connect" class="active" title="Contact"><i class="fas fa-envelope"></i><span class="tooltip-text">Contact</span></a>
+    </nav>
+
+    <!-- ===== CONTACT SECTION ===== -->
+    <section class="section-padding" style="padding-top: 100px; min-height: 100vh;">
+        <div class="container">
+            <h2 class="section-title" data-aos="fade-up">Get in <span>Touch</span></h2>
+
+            <div class="row g-4">
+                <!-- Left Column: Info + Social + Resume -->
+                <div class="col-lg-5" data-aos="fade-up" data-aos-delay="100">
+                    <!-- Contact Info -->
+                    <div class="glass-card mb-4">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-map-marker-alt fa-2x" style="color: var(--secondary);"></i>
+                                <div class="ms-3">
+                                    <h6 class="text-white mb-0">Location</h6>
+                                    <p class="text-muted mb-0" style="font-size: 0.9rem;">Bengaluru, India</p>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-envelope fa-2x" style="color: var(--primary);"></i>
+                                <div class="ms-3">
+                                    <h6 class="text-white mb-0">Email</h6>
+                                    <a href="mailto:narendra@example.com" style="color: #aaa; text-decoration: none; font-size: 0.9rem;">narendra@example.com</a>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-phone-alt fa-2x" style="color: gold;"></i>
+                                <div class="ms-3">
+                                    <h6 class="text-white mb-0">Phone</h6>
+                                    <p class="text-muted mb-0" style="font-size: 0.9rem;">+91 98765 43210</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Social + Resume -->
+                    <div class="glass-card">
+                        <div class="card-body">
+                            <h6 class="text-white mb-3">Connect Socially</h6>
+                            <div class="d-flex gap-3 flex-wrap">
+                                <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                                <a href="#" class="social-icon"><i class="fab fa-github"></i></a>
+                                <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                                <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
+                                <a href="#" class="social-icon"><i class="fab fa-dev"></i></a>
+                            </div>
+
+                            <hr style="border-color: var(--glass-border);">
+                            <!-- Resume Download -->
+                            <a href="narendra.pdf" download="Narendra_DevOps_Resume.pdf" class="btn-glass-primary" style="text-decoration: none; display: block; text-align: center;">
+                                <i class="fas fa-file-pdf"></i> 📄 Download Resume
+                            </a>
+                            <p style="color: rgba(255,255,255,0.2); font-size: 0.7rem; margin-top: 8px; text-align: center;">
+                                <i class="fas fa-shield-alt" style="color: var(--secondary);"></i> Updated 2026
+                            </p>
+
+                            <hr style="border-color: var(--glass-border);">
+                            <p style="color: rgba(255,255,255,0.3); font-size: 0.8rem; margin: 0; text-align: center;">
+                                <i class="fas fa-clock" style="color: var(--secondary);"></i> Available for freelance & full‑time
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Contact Form (uses Formspree) -->
+                <div class="col-lg-7" data-aos="fade-up" data-aos-delay="200">
+                    <div class="glass-card">
+                        <div class="card-body">
+                            <h5 class="text-white mb-3">Send a Message</h5>
+                            <!-- Replace YOUR_FORM_ID with your actual Formspree endpoint -->
+                            <form action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        <input type="text" class="form-control form-control-glass" name="name" placeholder="Your Name" required>
+                                    </div>
+                                    <div class="col-12">
+                                        <input type="email" class="form-control form-control-glass" name="email" placeholder="Email Address" required>
+                                    </div>
+                                    <div class="col-12">
+                                        <input type="text" class="form-control form-control-glass" name="subject" placeholder="Subject">
+                                    </div>
+                                    <div class="col-12">
+                                        <textarea class="form-control form-control-glass" name="message" rows="5" placeholder="Your Message..." required></textarea>
+                                    </div>
+                                    <div class="col-12">
+                                        <button type="submit" class="btn-glass-primary">
+                                            <i class="fas fa-paper-plane"></i> Send Message
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                            <div class="mt-3 text-center">
+                                <p style="color: rgba(255,255,255,0.2); font-size: 0.7rem;">
+                                    <i class="fas fa-lock" style="color: var(--secondary);"></i> Your data is safe
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    
+
+    <!-- ===== PLATFORM SWITCHER ===== -->
+    <div class="platform-switcher">
+        <a href="/" class="platform-btn portfolio"><i class="fas fa-user-astronaut"></i> Portfolio</a>
+        <a href="/home" class="platform-btn market"><i class="fas fa-chart-line"></i> Market Mentor</a>
+    </div>
+
+    <!-- ===== SCRIPTS ===== -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+    <!-- ===== THREE.JS STARFIELD ===== -->
+    <script>
+        (function() {
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            document.getElementById('three-canvas').appendChild(renderer.domElement);
+
+            const geometry = new THREE.BufferGeometry();
+            const count = 2000;
+            const positions = new Float32Array(count * 3);
+            const colors = new Float32Array(count * 3);
+            for (let i = 0; i < count * 3; i += 3) {
+                positions[i] = (Math.random() - 0.5) * 200;
+                positions[i+1] = (Math.random() - 0.5) * 200;
+                positions[i+2] = (Math.random() - 0.5) * 200;
+                const color = new THREE.Color();
+                color.setHSL(0.55 + Math.random() * 0.1, 0.8, 0.3 + Math.random() * 0.3);
+                colors[i] = color.r;
+                colors[i+1] = color.g;
+                colors[i+2] = color.b;
+            }
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            const material = new THREE.PointsMaterial({
+                size: 0.3,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.6,
+                blending: THREE.AdditiveBlending,
+                sizeAttenuation: true
+            });
+            const particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+            camera.position.z = 30;
+            let mouseX = 0, mouseY = 0;
+            document.addEventListener('mousemove', (e) => {
+                mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+                mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+            });
+            function animate() {
+                requestAnimationFrame(animate);
+                particles.rotation.x += 0.0001;
+                particles.rotation.y += 0.0002;
+                particles.rotation.x += mouseY * 0.0001;
+                particles.rotation.y += mouseX * 0.0001;
+                renderer.render(scene, camera);
+            }
+            animate();
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        })();
+    </script>
+
+    <!-- ===== MAIN SCRIPTS ===== -->
+    <script>
+        AOS.init({
+            duration: 1200,
+            once: true,
+            offset: 50,
+            easing: 'ease-out-cubic'
+        });
+
+        window.addEventListener('scroll', function() {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = (scrollTop / docHeight) * 100;
+            document.getElementById('scrollProgress').style.width = progress + '%';
+        });
+
+        // Custom cursor (only on desktop)
+        if (window.innerWidth > 768) {
+            document.addEventListener('DOMContentLoaded', function() {
+                const cursor = document.getElementById('customCursor');
+                const trail = document.getElementById('cursorTrail');
+                let trailPositions = [];
+                document.addEventListener('mousemove', function(e) {
+                    cursor.style.left = e.clientX + 'px';
+                    cursor.style.top = e.clientY + 'px';
+                    trailPositions.push({ x: e.clientX, y: e.clientY });
+                    if (trailPositions.length > 10) trailPositions.shift();
+                    if (trailPositions.length > 1) {
+                        const last = trailPositions[trailPositions.length - 1];
+                        trail.style.left = last.x + 'px';
+                        trail.style.top = last.y + 'px';
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+</html>

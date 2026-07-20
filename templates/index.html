@@ -4,16 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
     <title>MARKET-MENTOR</title>
-       <meta name="description"
-        content="Market Mentor - AI-powered stock market prediction and analysis platform">
-
+    <meta name="description" content="Market Mentor - AI-powered stock market prediction and analysis platform">
     <meta property="og:site_name" content="Market Mentor">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- Load Plotly JS -->
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
- <style>    
-     
+    <style>    
         body {
             background-color: #0a0a0a;
             color: #E0E0E0;
@@ -59,6 +56,7 @@
             border-radius: 6px;
             transition: all 0.3s ease;
             color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
         }
         
         .nav-link:hover {
@@ -212,7 +210,7 @@
             100% { transform: scale(1); }
         }
         
-        /* Chart Containers - IMPROVED FOR MOBILE */
+        /* Chart Containers */
         .chart-card {
             background-color: #121212;
             border: 1px solid rgba(255, 215, 0, 0.1);
@@ -240,6 +238,12 @@
             color: #ff6b6b;
         }
         
+        .alert-success {
+            background-color: rgba(0, 255, 0, 0.1);
+            border-color: rgba(0, 255, 0, 0.2);
+            color: #6bff6b;
+        }
+        
         /* Footer */
         .footer {
             background-color: #0a0a0a;
@@ -253,6 +257,7 @@
             justify-content: center;
             gap: 2rem;
             margin-bottom: 1.5rem;
+            flex-wrap: wrap;
         }
         
         .footer-link {
@@ -285,9 +290,8 @@
             border-color: gold !important;
         }
         
-        /* ===== ENHANCED MOBILE RESPONSIVE ADJUSTMENTS ===== */
+        /* Mobile Responsive */
         @media (max-width: 768px) {
-            /* Navigation */
             .navbar-collapse {
                 padding-top: 1rem;
             }
@@ -297,12 +301,10 @@
                 padding: 0.5rem;
             }
             
-            /* Chart containers - better mobile height and touch-friendly */
             .chart-card-body {
                 height: 280px;
             }
             
-            /* Cards spacing */
             .card {
                 margin-bottom: 16px;
             }
@@ -315,45 +317,37 @@
                 font-size: 1rem;
             }
             
-            /* Form rows stack on mobile */
             .row.g-3 {
                 --bs-gutter-y: 1rem;
             }
             
-            /* Button full width on mobile */
             .col-md-2.d-flex.align-items-end {
                 margin-top: 0.5rem;
             }
             
-            /* Price display */
             .display-6 {
                 font-size: 2rem;
             }
             
-            /* Table responsive - better scrolling */
             .table-responsive {
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
             }
             
-            /* Container padding */
             .container-fluid {
                 padding-left: 12px;
                 padding-right: 12px;
             }
             
-            /* Welcome message smaller on mobile */
             .welcome-message {
                 font-size: 0.8rem;
             }
             
-            /* Navbar brand */
             .navbar-brand {
                 font-size: 1.2rem;
             }
         }
         
-        /* Extra small devices (phones, 480px and down) */
         @media (max-width: 480px) {
             .chart-card-body {
                 height: 240px;
@@ -391,14 +385,12 @@
             }
         }
         
-        /* Landscape mode optimization */
         @media (max-width: 900px) and (orientation: landscape) {
             .chart-card-body {
                 height: 220px;
             }
         }
         
-        /* Special Elements */
         .welcome-message {
             color: rgba(255, 215, 0, 0.8);
             margin-right: 1rem;
@@ -408,44 +400,37 @@
         .stock-change-animation {
             animation: fadeIn 1s ease-in;
         }
-      
-        
-</style>
-<!-- Additional script to make Plotly graphs responsive on mobile -->
-<script>
-    // Function to make all Plotly graphs responsive on window resize
-    document.addEventListener('DOMContentLoaded', function() {
-        // Wait for Plotly to be fully loaded and graphs to render
-        setTimeout(function() {
-            // Find all Plotly graph divs and make them responsive
-            var plotlyDivs = document.querySelectorAll('.js-plotly-plot, .plotly-graph-div');
-            plotlyDivs.forEach(function(div) {
-                // Set responsive configuration
-                if (div._fullLayout) {
-                    Plotly.relayout(div.id, {
-                        'autosize': true,
-                        'margin.l': 40,
-                        'margin.r': 20,
-                        'margin.t': 50,
-                        'margin.b': 40
-                    });
-                }
-            });
-        }, 500);
-        
-        // Also handle window resize for responsive graphs
-        window.addEventListener('resize', function() {
-            var plotlyDivs = document.querySelectorAll('.js-plotly-plot, .plotly-graph-div');
-            plotlyDivs.forEach(function(div) {
-                if (div._fullLayout) {
-                    Plotly.relayout(div.id, {
-                        'autosize': true
-                    });
-                }
+    </style>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                var plotlyDivs = document.querySelectorAll('.js-plotly-plot, .plotly-graph-div');
+                plotlyDivs.forEach(function(div) {
+                    if (div._fullLayout) {
+                        Plotly.relayout(div.id, {
+                            'autosize': true,
+                            'margin.l': 40,
+                            'margin.r': 20,
+                            'margin.t': 50,
+                            'margin.b': 40
+                        });
+                    }
+                });
+            }, 500);
+            
+            window.addEventListener('resize', function() {
+                var plotlyDivs = document.querySelectorAll('.js-plotly-plot, .plotly-graph-div');
+                plotlyDivs.forEach(function(div) {
+                    if (div._fullLayout) {
+                        Plotly.relayout(div.id, {
+                            'autosize': true
+                        });
+                    }
+                });
             });
         });
-    });
-</script>
+    </script>
 </head>
 <body>
 <header>
@@ -454,27 +439,60 @@
             <a class="navbar-brand" href="{{ url_for('home') }}">
                 <i class="fas fa-chart-line"></i> MARKET-MENTOR
             </a>
-            <div class="d-flex align-items-center">
-                <span class="welcome-message">
-                    <i class="fas fa-user-circle"></i> Welcome, user!
-                </span>
-            
-               <a class="nav-link" href="{{ url_for('calculator') }}"><i class="fas fa-headset"></i> Calculator </a>
-                <a class="nav-link" href="{{ url_for('about') }}"><i class="fas fa-info-circle"></i> About-Site </a>
-                <a class="nav-link" href="{{ url_for('support') }}"><i class="fas fa-headset"></i> Support</a>
-        
-            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-lg-center">
+                    <!-- Welcome message with username from session -->
+                    <li class="nav-item">
+                        <span class="welcome-message">
+                            <i class="fas fa-user-circle"></i> 
+                            {% if username %}
+                                Welcome, {{ username }}!
+                            {% else %}
+                                Welcome, Guest!
+                            {% endif %}
+                        </span>
+                    </li>
+                    
+              
+                   
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('calculator') }}">
+                            <i class="fas fa-calculator"></i> Calculator
+                        </a>
+                    </li>
+                   
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('about') }}">
+                            <i class="fas fa-info-circle"></i> About
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('support') }}">
+                            <i class="fas fa-headset"></i> Support
+                        </a>
+                    </li>
+                      <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">
+                            <i class="fas fa-sign-out-al"></i> Log-Out
+                        </a>
+                    </li>
+                </ul>
             </div>
         </div>
     </nav>
 </header>
+
     <div class="container-fluid">
         <!-- Flash Messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
                     <div class="alert alert-{{ category }} alert-dismissible fade show">
-                        {{ message }}
+                        <i class="fas fa-info-circle"></i> {{ message }}
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 {% endfor %}
@@ -488,8 +506,7 @@
             </div>
             <div class="card-body">
                 <form method="POST" action="{{ url_for('predict') }}">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-
+                   
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label for="stock" class="form-label">Select Stock</label>
@@ -616,8 +633,8 @@
                                 <tbody>
                                     {% for date, price in predictions %}
                                     <tr>
-                                        <td>{{ date }}</span></tr>
-                                        <td>{{ "%.2f"|format(price) }}</span></tr>
+                                        <td>{{ date }}</td>
+                                        <td>{{ "%.2f"|format(price) }}</td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
@@ -648,19 +665,6 @@
   "name": "Market Mentor",
   "url": "https://chintulabs.online"
 }
-</script>
-    <script>
-
-    // Get the CSRF token from the meta tag or form input
-    var csrfToken = document.querySelector('input[name="csrf_token"]').value;
-    
-    $.ajaxSetup({
-        beforeSend: function(xhr, settings) {
-            if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
-                xhr.setRequestHeader("X-CSRFToken", csrfToken);
-            }
-        }
-    });
 </script>
 </body>
 </html>

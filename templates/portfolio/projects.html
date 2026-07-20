@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Projects · Cloud Operations Dashboard</title>
+    
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700;14..32,800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- AOS -->
+    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <style>
+        :root {
+            --primary: #7C4DFF;
+            --secondary: #00E5FF;
+            --accent: #00E5FF;
+            --neon-glow: rgba(0, 229, 255, 0.3);
+            --dark: #0a0e17;
+            --card-bg: rgba(16, 24, 40, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: var(--dark);
+            color: #E0E0E0;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            cursor: none;
+        }
+        
+        /* ===== CUSTOM CURSOR ===== */
+        .custom-cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--secondary);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 99999;
+            transition: all 0.1s ease;
+            mix-blend-mode: difference;
+        }
+        .custom-cursor::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 4px;
+            height: 4px;
+            background: var(--secondary);
+            border-radius: 50%;
+            box-shadow: 0 0 20px var(--secondary);
+        }
+        .cursor-trail {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--secondary);
+            pointer-events: none;
+            z-index: 99998;
+            opacity: 0.3;
+            transition: all 0.05s ease;
+        }
+        
+        /* ===== SCROLL PROGRESS ===== */
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--primary));
+            z-index: 99999;
+            transition: width 0.1s;
+            box-shadow: 0 0 20px var(--neon-glow);
+        }
+        
+        /* ===== THREE.JS CANVAS ===== */
+        #three-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        /* ===== SECTION PADDING ===== */
+        .section-padding {
+            padding: 100px 0;
+        }
+        .section-title {
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 50px;
+            color: white;
+            position: relative;
+        }
+        .section-title span {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 2px;
+            box-shadow: 0 0 20px var(--neon-glow);
+        }
+        
+        /* ===== GLASS NAVBAR ===== */
+        .glass-nav {
+            background: rgba(10, 14, 23, 0.8);
+            backdrop-filter: blur(20px) saturate(1.8);
+            -webkit-backdrop-filter: blur(20px) saturate(1.8);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 15px 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 9998;
+            transition: all 0.3s ease;
+        }
+        .glass-nav.scrolled {
+            background: rgba(10, 14, 23, 0.95);
+            box-shadow: 0 4px 30px rgba(0, 229, 255, 0.05);
+        }
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: white !important;
+            text-decoration: none;
+        }
+        .navbar-brand i {
+            color: var(--secondary);
+            text-shadow: 0 0 20px var(--neon-glow);
+        }
+        .nav-link {
+            color: rgba(255,255,255,0.6) !important;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 14px;
+            padding: 8px 18px !important;
+            border-radius: 8px;
+            text-decoration: none;
+            position: relative;
+        }
+        .nav-link:hover {
+            color: var(--secondary) !important;
+            background: rgba(0, 229, 255, 0.05);
+        }
+        .nav-link.active {
+            color: var(--secondary) !important;
+        }
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 2px;
+            background: var(--secondary);
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px var(--neon-glow);
+        }
+        .nav-link:hover::before {
+            width: 60%;
+        }
+        
+        /* ===== SIDEBAR NAV ===== */
+        .sidebar-nav {
+            position: fixed;
+            left: 25px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 9997;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 14px;
+            color: rgba(255,255,255,0.4);
+            text-decoration: none;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            font-size: 18px;
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+        .sidebar-nav a:hover {
+            background: rgba(0, 229, 255, 0.1);
+            border-color: var(--secondary);
+            color: var(--secondary);
+            transform: translateX(8px) scale(1.1);
+            box-shadow: 0 0 30px rgba(0, 229, 255, 0.15);
+        }
+        .sidebar-nav a.active {
+            background: rgba(0, 229, 255, 0.12);
+            border-color: var(--secondary);
+            color: var(--secondary);
+            box-shadow: 0 0 30px rgba(0, 229, 255, 0.2);
+        }
+        .sidebar-nav a .tooltip-text {
+            display: none;
+            position: absolute;
+            left: 60px;
+            background: rgba(10,14,23,0.95);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            white-space: nowrap;
+            border: 1px solid var(--glass-border);
+        }
+        .sidebar-nav a:hover .tooltip-text {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        .sidebar-nav a .tooltip-text::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 50%;
+            transform: translateY(-50%);
+            border-right: 6px solid rgba(10,14,23,0.95);
+            border-top: 6px solid transparent;
+            border-bottom: 6px solid transparent;
+        }
+        
+        /* ===== GLASS CARDS ===== */
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px) saturate(1.8);
+            -webkit-backdrop-filter: blur(20px) saturate(1.8);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            overflow: hidden;
+            height: 100%;
+        }
+        .glass-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(0, 229, 255, 0.2);
+            box-shadow: 0 20px 60px rgba(0, 229, 255, 0.05);
+        }
+        .glass-card .card-body {
+            padding: 30px;
+        }
+        
+        /* ===== BADGES ===== */
+        .badge-glass {
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            display: inline-block;
+            margin: 3px;
+        }
+        .badge-primary-glass {
+            background: rgba(124, 77, 255, 0.15);
+            color: var(--primary);
+            border: 1px solid rgba(124, 77, 255, 0.2);
+        }
+        .badge-cyan-glass {
+            background: rgba(0, 229, 255, 0.1);
+            color: var(--secondary);
+            border: 1px solid rgba(0, 229, 255, 0.15);
+        }
+        .badge-gold-glass {
+            background: rgba(255, 215, 0, 0.1);
+            color: gold;
+            border: 1px solid rgba(255, 215, 0, 0.15);
+        }
+        .badge-red-glass {
+            background: rgba(255, 107, 107, 0.1);
+            color: #ff6b6b;
+            border: 1px solid rgba(255, 107, 107, 0.15);
+        }
+        
+        /* ===== PLATFORM SWITCHER ===== */
+        .platform-switcher {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            z-index: 9999;
+            display: flex;
+            gap: 12px;
+        }
+        .platform-btn {
+            padding: 12px 22px;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 4px 30px rgba(0,0,0,0.4);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(20px);
+        }
+        .platform-btn.market {
+            background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,107,0,0.2));
+            border: 1px solid rgba(255,215,0,0.2);
+            color: gold;
+        }
+        .platform-btn.market:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 40px rgba(255, 215, 0, 0.15);
+        }
+        .platform-btn.portfolio {
+            background: linear-gradient(135deg, rgba(124,77,255,0.2), rgba(0,229,255,0.2));
+            border: 1px solid rgba(0,229,255,0.15);
+            color: var(--secondary);
+        }
+        .platform-btn.portfolio:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 40px rgba(0, 229, 255, 0.15);
+        }
+        .platform-btn.active {
+            opacity: 0.5;
+            cursor: default;
+            transform: none !important;
+        }
+        
+        /* ===== FOOTER ===== */
+        .glass-footer {
+            background: rgba(10,14,23,0.8);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--glass-border);
+            padding: 40px 0;
+        }
+        
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 992px) {
+            .sidebar-nav {
+                left: 12px;
+                gap: 8px;
+            }
+            .sidebar-nav a {
+                width: 42px;
+                height: 42px;
+                font-size: 15px;
+                border-radius: 10px;
+            }
+            .sidebar-nav a .tooltip-text {
+                display: none !important;
+            }
+            .section-title {
+                font-size: 2.2rem;
+            }
+        }
+        @media (max-width: 768px) {
+            .section-padding {
+                padding: 60px 0;
+            }
+            .platform-switcher {
+                bottom: 12px;
+                right: 12px;
+                flex-direction: column;
+                gap: 8px;
+            }
+            .platform-btn {
+                padding: 10px 16px;
+                font-size: 11px;
+            }
+            .sidebar-nav {
+                left: 8px;
+                gap: 5px;
+            }
+            .sidebar-nav a {
+                width: 35px;
+                height: 35px;
+                font-size: 12px;
+                border-radius: 8px;
+            }
+            .custom-cursor, .cursor-trail {
+                display: none !important;
+            }
+            body {
+                cursor: auto;
+            }
+            .section-title::after {
+                left: 50%;
+                transform: translateX(-50%);
+            }
+            .section-title {
+                text-align: center;
+            }
+        }
+        @media (max-width: 480px) {
+            .sidebar-nav {
+                left: 5px;
+                gap: 4px;
+            }
+            .sidebar-nav a {
+                width: 30px;
+                height: 30px;
+                font-size: 10px;
+                border-radius: 6px;
+            }
+        }
+        
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+    </style>
+</head>
+<body>
+    <!-- ===== CUSTOM CURSOR ===== -->
+    <div class="custom-cursor" id="customCursor"></div>
+    <div class="cursor-trail" id="cursorTrail"></div>
+
+    <!-- ===== SCROLL PROGRESS ===== -->
+    <div class="scroll-progress" id="scrollProgress"></div>
+
+    <!-- ===== THREE.JS STARFIELD ===== -->
+    <div id="three-canvas"></div>
+
+    <!-- ===== SIDEBAR NAV ===== -->
+    <nav class="sidebar-nav" id="sidebarNav">
+        <a href="/" title="Home"><i class="fas fa-home"></i><span class="tooltip-text">Home</span></a>
+        <a href="{{ url_for('projects') }}" class="active" title="Projects"><i class="fas fa-code"></i><span class="tooltip-text">Projects</span></a>
+        
+        <a href="{{ url_for('skills') }}" title="Skills"><i class="fas fa-tools"></i><span class="tooltip-text">Skills</span></a>
+        <a href="{{ url_for('education') }}" title="Education"><i class="fas fa-graduation-cap"></i><span class="tooltip-text">Education</span></a>
+        <a href="/contact" title="Contact"><i class="fas fa-envelope"></i><span class="tooltip-text">Contact</span></a>
+    </nav>
+
+    <!-- ===== GLASS NAVBAR ===== -->
+    
+
+    <!-- ===== PROJECTS SECTION ===== -->
+    <section class="section-padding" style="padding-top: 120px; min-height: 100vh;">
+        <div class="container">
+            <h2 class="section-title" data-aos="fade-up">Featured <span>Projects</span></h2>
+            
+            <div class="row g-4">
+                <!-- Project 1: Market Mentor -->
+                <div class="col-md-4" data-aos="fade-up">
+                    <div class="glass-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <i class="fas fa-chart-line fa-3x" style="color: gold;"></i>
+                                <span class="badge-gold-glass">Featured</span>
+                            </div>
+                            <h5 class="text-white">Market Mentor</h5>
+                            <p class="text-muted" style="font-size: 0.9rem;">
+                                AI-powered stock prediction platform with LSTM models for NSE stocks. Real-time predictions with interactive charts.
+                            </p>
+                            <div class="mt-3">
+                                <span class="badge-gold-glass">Python</span>
+                                <span class="badge-primary-glass">Flask</span>
+                                <span class="badge-cyan-glass">TensorFlow</span>
+                                <span class="badge-red-glass">Plotly</span>
+                            </div>
+                            <a href="/market-mentor" class="btn btn-sm mt-3" style="background: linear-gradient(135deg, gold, #ff6b00); color: #121212; border: none; border-radius: 50px; padding: 8px 20px;">
+                                <i class="fas fa-external-link-alt"></i> View Project
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Project 2: Production-Ready Kubernetes Cluster on AWS -->
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="glass-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <i class="fas fa-cubes fa-3x" style="color: var(--secondary);"></i>
+                                <span class="badge-cyan-glass">Kubernetes</span>
+                            </div>
+                            <h5 class="text-white">Production-Ready Kubernetes Cluster on AWS</h5>
+                            <p class="text-muted" style="font-size: 0.9rem;">
+                                Designed AWS networking with VPC, public/private subnets, route tables, and security groups. Built multi-node Kubernetes cluster using kubeadm with Flannel CNI.
+                            </p>
+                            <div class="mt-3">
+                                <span class="badge-cyan-glass">AWS</span>
+                                <span class="badge-primary-glass">kubeadm</span>
+                                <span class="badge-gold-glass">Flannel</span>
+                                <span class="badge-red-glass">EC2</span>
+                            </div>
+                            <a href="#" class="btn btn-sm mt-3" style="background: linear-gradient(135deg, var(--secondary), #00b4d8); color: white; border: none; border-radius: 50px; padding: 8px 20px;">
+                                <i class="fas fa-external-link-alt"></i> View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Project 3: Jenkins CI/CD Pipeline Automation -->
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="glass-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <i class="fas fa-code-branch fa-3x" style="color: #D24939;"></i>
+                                <span class="badge-red-glass">CI/CD</span>
+                            </div>
+                            <h5 class="text-white">Jenkins CI/CD Pipeline Automation</h5>
+                            <p class="text-muted" style="font-size: 0.9rem;">
+                                Built automated CI/CD pipelines with Jenkins, integrated with GitHub, containerized apps with Docker, and automated Kubernetes deployments.
+                            </p>
+                            <div class="mt-3">
+                                <span class="badge-red-glass">Jenkins</span>
+                                <span class="badge-primary-glass">GitHub</span>
+                                <span class="badge-cyan-glass">Docker</span>
+                                <span class="badge-gold-glass">Kubernetes</span>
+                            </div>
+                            <a href="#" class="btn btn-sm mt-3" style="background: linear-gradient(135deg, #D24939, #b33a2c); color: white; border: none; border-radius: 50px; padding: 8px 20px;">
+                                <i class="fas fa-external-link-alt"></i> View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Project 4: Production Portfolio Deployment on AWS & Nginx -->
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
+                    <div class="glass-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <i class="fas fa-server fa-3x" style="color: gold;"></i>
+                                <span class="badge-gold-glass">Hosted</span>
+                            </div>
+                            <h5 class="text-white">Production Portfolio on AWS & Nginx</h5>
+                            <p class="text-muted" style="font-size: 0.9rem;">
+                                Hosted portfolio on AWS EC2 with Nginx reverse proxy, custom domain via Route 53, and HTTPS with SSL certificates.
+                            </p>
+                            <div class="mt-3">
+                                <span class="badge-gold-glass">AWS EC2</span>
+                                <span class="badge-cyan-glass">Nginx</span>
+                                <span class="badge-primary-glass">Route 53</span>
+                                <span class="badge-red-glass">SSL</span>
+                            </div>
+                            <a href="/" class="btn btn-sm mt-3" style="background: linear-gradient(135deg, gold, #f9a825); color: #121212; border: none; border-radius: 50px; padding: 8px 20px;">
+                                <i class="fas fa-external-link-alt"></i> View Live
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Project 5: Infrastructure as Code with Terraform -->
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="400">
+                    <div class="glass-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <i class="fas fa-terminal fa-3x" style="color: #7B42BC;"></i>
+                                <span class="badge-primary-glass">IaC</span>
+                            </div>
+                            <h5 class="text-white">Infrastructure as Code with Terraform</h5>
+                            <p class="text-muted" style="font-size: 0.9rem;">
+                                Automated AWS infrastructure provisioning using Terraform – VPC, subnets, EC2, IAM, and security groups with modular design.
+                            </p>
+                            <div class="mt-3">
+                                <span class="badge-primary-glass">Terraform</span>
+                                <span class="badge-gold-glass">AWS</span>
+                                <span class="badge-cyan-glass">IAM</span>
+                            </div>
+                            <a href="#" class="btn btn-sm mt-3" style="background: linear-gradient(135deg, #7B42BC, #4B0082); color: white; border: none; border-radius: 50px; padding: 8px 20px;">
+                                <i class="fas fa-external-link-alt"></i> View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Project 6: Configuration Management with Ansible -->
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="500">
+                    <div class="glass-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <i class="fas fa-play fa-3x" style="color: #EE0000;"></i>
+                                <span class="badge-red-glass">Automation</span>
+                            </div>
+                            <h5 class="text-white">Configuration Management with Ansible</h5>
+                            <p class="text-muted" style="font-size: 0.9rem;">
+                                Automated server configuration and application deployment using Ansible playbooks on Ubuntu Linux.
+                            </p>
+                            <div class="mt-3">
+                                <span class="badge-red-glass">Ansible</span>
+                                <span class="badge-cyan-glass">Ubuntu</span>
+                                <span class="badge-primary-glass">YAML</span>
+                            </div>
+                            <a href="#" class="btn btn-sm mt-3" style="background: linear-gradient(135deg, #EE0000, #cc0000); color: white; border: none; border-radius: 50px; padding: 8px 20px;">
+                                <i class="fas fa-external-link-alt"></i> View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== GLASS FOOTER ===== -->
+    <footer class="glass-footer">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start">
+                    <p style="color: rgba(255,255,255,0.3); margin: 0; font-size: 14px;">
+                        <i class="fas fa-cloud" style="color: var(--secondary);"></i>
+                        &copy; 2026 Narendra Babu N · Cloud Operations
+                    </p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <div style="display: flex; gap: 15px; justify-content: center; justify-content-md-end;">
+                        <a href="#" style="color: rgba(255,255,255,0.3); transition: all 0.3s ease;"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" style="color: rgba(255,255,255,0.3); transition: all 0.3s ease;"><i class="fab fa-github"></i></a>
+                        <a href="#" style="color: rgba(255,255,255,0.3); transition: all 0.3s ease;"><i class="fab fa-twitter"></i></a>
+                        <a href="#" style="color: rgba(255,255,255,0.3); transition: all 0.3s ease;"><i class="fab fa-youtube"></i></a>
+                        <a href="/projects" style="color: rgba(255,255,255,0.3); transition: all 0.3s ease;"><i class="fas fa-chevron-up"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ===== PLATFORM SWITCHER ===== -->
+    <div class="platform-switcher">
+        <a href="/" class="platform-btn portfolio"><i class="fas fa-user-astronaut"></i> Portfolio</a>
+        <a href="/home" class="platform-btn market"><i class="fas fa-chart-line"></i> Market Mentor</a>
+    </div>
+
+    <!-- ===== SCRIPTS ===== -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    
+    <!-- ===== THREE.JS STARFIELD ===== -->
+    <script>
+        (function() {
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            document.getElementById('three-canvas').appendChild(renderer.domElement);
+            
+            const geometry = new THREE.BufferGeometry();
+            const count = 2000;
+            const positions = new Float32Array(count * 3);
+            const colors = new Float32Array(count * 3);
+            for (let i = 0; i < count * 3; i += 3) {
+                positions[i] = (Math.random() - 0.5) * 200;
+                positions[i+1] = (Math.random() - 0.5) * 200;
+                positions[i+2] = (Math.random() - 0.5) * 200;
+                const color = new THREE.Color();
+                color.setHSL(0.55 + Math.random() * 0.1, 0.8, 0.3 + Math.random() * 0.3);
+                colors[i] = color.r;
+                colors[i+1] = color.g;
+                colors[i+2] = color.b;
+            }
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            const material = new THREE.PointsMaterial({
+                size: 0.3,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.6,
+                blending: THREE.AdditiveBlending,
+                sizeAttenuation: true
+            });
+            const particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+            camera.position.z = 30;
+            let mouseX = 0, mouseY = 0;
+            document.addEventListener('mousemove', (e) => {
+                mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+                mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+            });
+            function animate() {
+                requestAnimationFrame(animate);
+                particles.rotation.x += 0.0001;
+                particles.rotation.y += 0.0002;
+                particles.rotation.x += mouseY * 0.0001;
+                particles.rotation.y += mouseX * 0.0001;
+                renderer.render(scene, camera);
+            }
+            animate();
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        })();
+    </script>
+
+    <!-- ===== MAIN SCRIPTS ===== -->
+    <script>
+        AOS.init({
+            duration: 1200,
+            once: true,
+            offset: 50,
+            easing: 'ease-out-cubic'
+        });
+        
+        window.addEventListener('scroll', function() {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = (scrollTop / docHeight) * 100;
+            document.getElementById('scrollProgress').style.width = progress + '%';
+            if (scrollTop > 50) {
+                document.getElementById('glassNav').classList.add('scrolled');
+            } else {
+                document.getElementById('glassNav').classList.remove('scrolled');
+            }
+        });
+        
+        // ===== CUSTOM CURSOR =====
+        document.addEventListener('DOMContentLoaded', function() {
+            const cursor = document.getElementById('customCursor');
+            const trail = document.getElementById('cursorTrail');
+            let trailPositions = [];
+            document.addEventListener('mousemove', function(e) {
+                cursor.style.left = e.clientX + 'px';
+                cursor.style.top = e.clientY + 'px';
+                trailPositions.push({ x: e.clientX, y: e.clientY });
+                if (trailPositions.length > 10) trailPositions.shift();
+                if (trailPositions.length > 1) {
+                    const last = trailPositions[trailPositions.length - 1];
+                    trail.style.left = last.x + 'px';
+                    trail.style.top = last.y + 'px';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

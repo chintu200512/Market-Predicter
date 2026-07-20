@@ -209,13 +209,6 @@ def create_prediction_chart(dates, values):
         return None
 
 # -------------------- Decorators -------------------
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if 'email' not in session:
-            flash('Please log in to access this page', 'danger')
-            return redirect(url_for('login'))
-        return f(*args, **kwargs)
-    return decorated_function
 
 
 # -------------------- Form Classes --------------------
@@ -241,6 +234,10 @@ class CalculatorForm(FlaskForm):
 
 
 @app.route('/')
+def portfolio():
+    return render_template('chintu.html', 
+    )
+@app.route('/home')
 def home():
     return render_template('index.html', 
                          stocks=stock_list, 
@@ -569,7 +566,32 @@ def sitemap():
 def robots():
     return send_from_directory('static', 'robots.txt')
 
+@app.route('/portfolio/certificate')
+def certificate():
+    return render_template('portfolio/certificate.html')
+
+@app.route('/portfolio/education')
+def education():
+    return render_template('portfolio/education.html')
+
+@app.route('/portfolio/skills')
+def skills():
+    return render_template('portfolio/skills.html')
+
+@app.route('/portfolio/projects')
+def projects():
+    return render_template('portfolio/projects.html')
+
+@app.route('/portfolio/connect.html')
+def connect():
+    return render_template('portfolio/connect.html')
+
+@app.route('/logout')
+def logout():
+    session.clear()   # Clears all session data
+    flash("Logged out successfully!", "success")
+    return redirect(url_for('portfolio'))
+
 if __name__=="__main__":
     app.run(host="0.0.0.0",port=5000, debug=True)
-
 

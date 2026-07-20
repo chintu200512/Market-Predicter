@@ -1,7 +1,7 @@
 # Flask ecosystem (Python 3.10 compatible)
 Flask
 Werkzeug
-Flask-Login
+
 Flask-WTF
 Flask-SQLAlchemy
 python-dotenv
