@@ -505,13 +505,29 @@
 
     <!-- Sidebar Nav -->
     <nav class="sidebar-nav" id="sidebarNav">
-        <a href="/" title="Home"><i class="fas fa-home"></i><span class="tooltip-text">Home</span></a>
-        <a href=" {{ url_for('projects') }} "title="Projects"><i class="fas fa-code"></i><span class="tooltip-text">Projects</span></a>
-       
-        <a href="{{ url_for('skills') }}" ><i class="fas fa-tools"></i><span class="tooltip-text">Skills</span></a>
+        <a href="/" class="active" title="Home">
+            <i class="fas fa-home"></i>
+            <span class="tooltip-text">Home</span>
+        </a>
+        <a href="{{ url_for('projects') }}"> 
+            <i class="fas fa-code"></i>
+            <span class="tooltip-text">Projects</span>
+        </a>
+        
+        <a class="nav-link" href="{{ url_for('education') }}">
+        <i class="fas fa-graduation-cap"></i> 
+         <span class="tooltip-text">Education</span>
+    </a>
 
-        <a href="{{ url_for('education') }}" class="active" title="Education"><i class="fas fa-graduation-cap"></i><span class="tooltip-text">Education</span></a>
-        <a href="" ><i class="fas fa-envelope"></i><span class="tooltip-text">Contact</span></a>
+        <a href="{{ url_for('skills') }}" >
+            <i class="fas fa-tools"></i>
+            <span class="tooltip-text">Skills</span>
+        </a>
+      <a href="{{ url_for('connect') }}">
+    <i class="fas fa-tools"></i>
+    <span class="tooltip-text">Connect</span>
+</a>
+       
     </nav>
 
     <!-- Glass Navbar -->

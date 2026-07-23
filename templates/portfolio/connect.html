@@ -346,12 +346,30 @@
     <div id="three-canvas"></div>
 
     <!-- Sidebar Navigation -->
-    <nav class="sidebar-nav">
-        <a href="/" title="Home"><i class="fas fa-home"></i><span class="tooltip-text">Home</span></a>
-        <a href="/projects" title="Projects"><i class="fas fa-code"></i><span class="tooltip-text">Projects</span></a>
-        <a href="/skills" title="Skills"><i class="fas fa-tools"></i><span class="tooltip-text">Skills</span></a>
-        <a href="/education" title="Education"><i class="fas fa-graduation-cap"></i><span class="tooltip-text">Education</span></a>
-        <a href="/connect" class="active" title="Contact"><i class="fas fa-envelope"></i><span class="tooltip-text">Contact</span></a>
+   <nav class="sidebar-nav" id="sidebarNav">
+        <a href="/" class="active" title="Home">
+            <i class="fas fa-home"></i>
+            <span class="tooltip-text">Home</span>
+        </a>
+        <a href="{{ url_for('projects') }}"> 
+            <i class="fas fa-code"></i>
+            <span class="tooltip-text">Projects</span>
+        </a>
+        
+        <a class="nav-link" href="{{ url_for('education') }}">
+        <i class="fas fa-graduation-cap"></i> 
+         <span class="tooltip-text">Education</span>
+    </a>
+
+        <a href="{{ url_for('skills') }}" >
+            <i class="fas fa-tools"></i>
+            <span class="tooltip-text">Skills</span>
+        </a>
+      <a href="{{ url_for('connect') }}">
+    <i class="fas fa-tools"></i>
+    <span class="tooltip-text">Connect</span>
+</a>
+       
     </nav>
 
     <!-- ===== CONTACT SECTION ===== -->
