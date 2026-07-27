@@ -1,11 +1,11 @@
 #!/bin/bash
 # Python Web Server & Tunnel Launcher
 
+APP_FILE="app.py"
+PORT="5000"
+
 # Gracefully handle Ctrl+C (SIGINT)
 trap 'printf "\n[!] Stopping services...\n"; stop' 2
-
-APP_FILE="app.py"     # <--- Updated to match your file
-PORT="5000"           # <--- Updated to match Flask
 
 banner() {
     clear
@@ -22,7 +22,6 @@ check_dependencies() {
 }
 
 stop() {
-    # Terminate background Cloudflared and Python processes
     pkill -f "cloudflared" > /dev/null 2>&1
     pkill -f "$APP_FILE" > /dev/null 2>&1
     pkill -f "http.server $PORT" > /dev/null 2>&1
@@ -53,22 +52,24 @@ setup_cloudflared() {
 start_server() {
     printf "\n\e[1;93mSelect execution mode:\e[0m\n"
     printf " [1] Run custom Python script (\e[1;36m%s\e[0m)\n" "$APP_FILE"
-    printf " [2] Serve HTML files in current folder via Python HTTP module\n"
+    printf " [2] Serve static files via Python HTTP module\n"
     read -p "Option [1/2] (Default: 1): " mode_choice
     mode_choice="${mode_choice:-1}"
 
     printf "\e[1;92m[+] Starting local Python server on port %s...\e[0m\n" "$PORT"
+    
+    # Reset old log file
+    rm -f app.log
 
     if [[ "$mode_choice" == "1" ]]; then
         if [[ ! -f "$APP_FILE" ]]; then
             printf "\e[1;31m[!] Error: %s not found in current directory!\e[0m\n" "$APP_FILE"
             exit 1
         fi
-        # Passes the port securely as an environment variable
-        PORT="$PORT" python3 "$APP_FILE" > /dev/null 2>&1 &
+        # Redirect standard output and errors to app.log instead of discarding them
+        PORT="$PORT" python3 "$APP_FILE" > app.log 2>&1 &
     else
-        # Built-in static file server for serving static HTML/JS/CSS
-        python3 -m http.server "$PORT" > /dev/null 2>&1 &
+        python3 -m http.server "$PORT" > app.log 2>&1 &
     fi
 
     sleep 2
@@ -84,9 +85,17 @@ start_tunnel() {
         rm -f cf.log
         ./cloudflared tunnel --url "http://127.0.0.1:$PORT" --logfile cf.log > /dev/null 2>&1 &
         
-        sleep 6
+        printf "\e[1;90m[*] Waiting for public link...\e[0m\n"
         
-        link=$(grep -o 'https://[-0-9a-z]*\.trycloudflare.com' "cf.log" | head -n1)
+        # Wait up to 10 seconds for the Cloudflare link to generate
+        link=""
+        for i in {1..10}; do
+            sleep 1
+            if [[ -f "cf.log" ]]; then
+                link=$(grep -o 'https://[-0-9a-z]*\.trycloudflare.com' "cf.log" | head -n1)
+                [[ -n "$link" ]] && break
+            fi
+        done
         
         if [[ -z "$link" ]]; then
             printf "\e[1;31m[!] Could not generate public URL. Check cf.log for details.\e[0m\n"
@@ -99,13 +108,18 @@ start_tunnel() {
         printf "\e[1;32m[+] Server active locally at: http://127.0.0.1:%s\e[0m\n" "$PORT"
     fi
 
-    printf "\n\e[1;90m[*] Server running. Press Ctrl + C to stop.\e[0m\n"
+    printf "\n\e[1;90m[*] Server running.\e[0m\n"
+    printf "    - Stream App Logs:   \e[1;36mtail -f app.log\e[0m\n"
+    printf "    - Stream Tunnel Logs:\e[1;36mtail -f cf.log\e[0m\n"
+    printf "    - Press Ctrl + C to stop.\n\n"
+
+    # Keeps script alive to maintain background process traps
     while true; do
         sleep 1
     done
 }
 
-# Execution Flow
+# Main Execution Flow
 banner
 check_dependencies
 start_server
