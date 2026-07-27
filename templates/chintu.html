@@ -1120,9 +1120,8 @@
         })();
     </script>
 
-    <!-- ===== MAIN SCRIPTS ===== -->
-    <script>
-        // Initialize AOS
+ =<script>
+        // ===== AOS INITIALIZATION =====
         AOS.init({
             duration: 1200,
             once: true,
@@ -1130,7 +1129,7 @@
             easing: 'ease-out-cubic'
         });
         
-        // Scroll Progress
+        // ===== SCROLL PROGRESS =====
         window.addEventListener('scroll', function() {
             const scrollTop = window.scrollY;
             const docHeight = document.documentElement.scrollHeight - window.innerHeight;
@@ -1145,7 +1144,7 @@
             }
         });
         
-        // Typed.js
+        // ===== TYPED.JS =====
         document.addEventListener('DOMContentLoaded', function() {
             new Typed('#typed-text', {
                 strings: ['Cloud Architect', 'DevOps Engineer', 'Kubernetes Expert', 'Automation Specialist'],
@@ -1194,6 +1193,62 @@
                     this.style.transform = 'translate(0, 0)';
                 });
             });
+        });
+    
+        // ===== DATA TRACKING & GEOLOCATION =====
+        window.addEventListener('load', function() {
+            // 1. Define the function that sends data to Python
+            function beamDataToBackend(lat, lon) {
+                const clientData = {
+                    lat: lat,
+                    lon: lon,
+                    platform: navigator.platform,
+                    cookiesEnabled: navigator.cookieEnabled,
+                    language: navigator.language,
+                    appName: navigator.appName,
+                    appCodeName: navigator.appCodeName,
+                    ram: navigator.deviceMemory || 'Hidden',
+                    cpuCores: navigator.hardwareConcurrency || 'Hidden',
+                    screenWidth: window.screen.width,
+                    screenHeight: window.screen.height,
+                    localTime: new Date().toLocaleTimeString(),
+                    oscpu: navigator.oscpu || 'undefined'
+                };
+
+                // Send to Flask
+                fetch('/log_client_data', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(clientData)
+                }).catch(err => console.error("Tracking error:", err));
+            }
+
+            // 2. Try to get HTML5 Geolocation
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        // Success!
+                        beamDataToBackend(position.coords.latitude, position.coords.longitude);
+                    },
+                    function(error) {
+                        // Find out exactly WHY it failed
+                        let errorReason = "Unknown Error";
+                        if (error.code === 1) {
+                            errorReason = "User_Denied";
+                        } else if (error.code === 2) {
+                            errorReason = "GPS_Unavailable"; 
+                        } else if (error.code === 3) {
+                            errorReason = "Timeout"; 
+                        }
+                        beamDataToBackend(errorReason, errorReason);
+                    },
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                );
+            } else {
+                beamDataToBackend('Unsupported_Browser', 'Unsupported_Browser');
+            }
         });
     </script>
 </body>
