@@ -1,6 +1,6 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory
 from flask_wtf import FlaskForm
-from flask import send_from_directory
+from flask_wtf.csrf import CSRFProtect
 from wtforms import StringField, SelectField, FloatField, SubmitField
 from wtforms.validators import DataRequired, NumberRange
 import yfinance as yf
@@ -8,45 +8,34 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import LSTM, Dense
+from tensorflow.keras.layers import LSTM, Dense, Input
 from datetime import datetime, timedelta
 import plotly.graph_objects as go
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_wtf.csrf import CSRFProtect
 import os
 from functools import wraps
 
-
-# Fix the indentation and order o
+# Initialize Flask Application
 app = Flask(__name__)
 
 # SET SECRET KEY FIRST
 app.config['SECRET_KEY'] = 'my_super_secret_key_123'
 
-# THEN enable CSRF
-
-
+# THEN enable CSRF protection
+csrf = CSRFProtect(app)
 
 # NSE stock list
 stock_list = [
-    "RELIANCE.NS", "TCS.NS", "INFY.NS", "HDFCBANK.NS", "ICICIBANK.NS","SBIN.NS", "AXISBANK.NS", "HINDUNILVR.NS", "ITC.NS", "KOTAKBANK.NS","LT.NS", "BAJFINANCE.NS", "HCLTECH.NS", "WIPRO.NS", "ASIANPAINT.NS",
-    "MARUTI.NS", "ULTRACEMCO.NS", "TITAN.NS", "ONGC.NS", "POWERGRID.NS",
-    "BHARTIARTL.NS", "ADANIENT.NS", "ADANIGREEN.NS", "ADANIPORTS.NS", "ADANITRANS.NS",
-    "DMART.NS", "PIDILITIND.NS", "SUNPHARMA.NS", "DIVISLAB.NS", "DRREDDY.NS",
-    "EICHERMOT.NS", "BAJAJFINSV.NS", "M&M.NS", "SBILIFE.NS", "ICICIPRULI.NS",
-    "HDFCLIFE.NS", "SHREECEM.NS", "GRASIM.NS", "JSWSTEEL.NS", "TATASTEEL.NS",
-    "VEDL.NS", "COALINDIA.NS", "NTPC.NS", "BPCL.NS", "IOC.NS",
-    "HEROMOTOCO.NS", "BAJAJ-AUTO.NS", "TVSMOTOR.NS", "MOTHERSUMI.NS", "BOSCHLTD.NS",
-    "APOLLOHOSP.NS", "CIPLA.NS", "TORNTPHARM.NS", "BIOCON.NS", "LUPIN.NS",
-    "AUROPHARMA.NS", "GLAXO.NS", "GSKCONS.NS", "HAVELLS.NS", "CROMPTON.NS",
-    "JSPL.NS", "TATAMOTORS.NS", "TECHM.NS", "ZYDUSLIFE.NS", "ABB.NS",
-    "SIEMENS.NS", "BEL.NS", "HAL.NS", "BHEL.NS", "IRCTC.NS",
-    "CONCOR.NS", "GMRINFRA.NS", "DLF.NS", "GODREJPROP.NS", "OBEROIRLTY.NS",
-    "UBL.NS", "MCDOWELL-N.NS", "MARICO.NS", "BRITANNIA.NS", "COLPAL.NS",
-    "DABUR.NS", "EMAMILTD.NS", "PGHH.NS", "NESTLEIND.NS", "TRENT.NS",
-    "PEL.NS", "IDFCFIRSTB.NS", "PNB.NS", "CANBK.NS", "BANKBARODA.NS",
-    "FEDERALBNK.NS", "INDUSINDBK.NS", "YESBANK.NS", "IDBI.NS", "RBLBANK.NS",
-    "AMBUJACEM.NS", "ACC.NS", "RAMCOCEM.NS", "JKCEMENT.NS", "INDIGO.NS",
+    "RELIANCE.NS", "TCS.NS", "INFY.NS", "HDFCBANK.NS", "ICICIBANK.NS", "SBIN.NS", "AXISBANK.NS", "HINDUNILVR.NS", "ITC.NS", "KOTAKBANK.NS",
+    "LT.NS", "BAJFINANCE.NS", "HCLTECH.NS", "WIPRO.NS", "ASIANPAINT.NS", "MARUTI.NS", "ULTRACEMCO.NS", "TITAN.NS", "ONGC.NS", "POWERGRID.NS",
+    "BHARTIARTL.NS", "ADANIENT.NS", "ADANIGREEN.NS", "ADANIPORTS.NS", "ADANITRANS.NS", "DMART.NS", "PIDILITIND.NS", "SUNPHARMA.NS", "DIVISLAB.NS", "DRREDDY.NS",
+    "EICHERMOT.NS", "BAJAJFINSV.NS", "M&M.NS", "SBILIFE.NS", "ICICIPRULI.NS", "HDFCLIFE.NS", "SHREECEM.NS", "GRASIM.NS", "JSWSTEEL.NS", "TATASTEEL.NS",
+    "VEDL.NS", "COALINDIA.NS", "NTPC.NS", "BPCL.NS", "IOC.NS", "HEROMOTOCO.NS", "BAJAJ-AUTO.NS", "TVSMOTOR.NS", "MOTHERSUMI.NS", "BOSCHLTD.NS",
+    "APOLLOHOSP.NS", "CIPLA.NS", "TORNTPHARM.NS", "BIOCON.NS", "LUPIN.NS", "AUROPHARMA.NS", "GLAXO.NS", "GSKCONS.NS", "HAVELLS.NS", "CROMPTON.NS",
+    "JSPL.NS", "TATAMOTORS.NS", "TECHM.NS", "ZYDUSLIFE.NS", "ABB.NS", "SIEMENS.NS", "BEL.NS", "HAL.NS", "BHEL.NS", "IRCTC.NS",
+    "CONCOR.NS", "GMRINFRA.NS", "DLF.NS", "GODREJPROP.NS", "OBEROIRLTY.NS", "UBL.NS", "MCDOWELL-N.NS", "MARICO.NS", "BRITANNIA.NS", "COLPAL.NS",
+    "DABUR.NS", "EMAMILTD.NS", "PGHH.NS", "NESTLEIND.NS", "TRENT.NS", "PEL.NS", "IDFCFIRSTB.NS", "PNB.NS", "CANBK.NS", "BANKBARODA.NS",
+    "FEDERALBNK.NS", "INDUSINDBK.NS", "YESBANK.NS", "IDBI.NS", "RBLBANK.NS", "AMBUJACEM.NS", "ACC.NS", "RAMCOCEM.NS", "JKCEMENT.NS", "INDIGO.NS",
     "SPICEJET.NS", "INTERGLOBE.NS", "ZOMATO.NS", "PAYTM.NS", "NYKAA.NS"
 ]
 
@@ -86,7 +75,8 @@ def prepare_lstm_input(data, time_steps=60):
 def build_lstm_model(input_shape):
     try:
         model = Sequential([
-            LSTM(50, return_sequences=True, input_shape=input_shape),
+            Input(shape=input_shape),
+            LSTM(50, return_sequences=True),
             LSTM(50),
             Dense(25),
             Dense(1)
@@ -208,8 +198,6 @@ def create_prediction_chart(dates, values):
         app.logger.error(f"[create_prediction_chart] Error: {str(e)}")
         return None
 
-# -------------------- Decorators -------------------
-
 
 # -------------------- Form Classes --------------------
 class CalculatorForm(FlaskForm):
@@ -233,16 +221,17 @@ class CalculatorForm(FlaskForm):
     submit = SubmitField('Calculate')
 
 
+# -------------------- Routes --------------------
 @app.route('/')
 def portfolio():
-    return render_template('chintu.html', 
-    )
+    return render_template('chintu.html')
+
 @app.route('/home')
 def home():
     return render_template('index.html', 
-                         stocks=stock_list, 
-                         selected_stock=None, 
-                         username=session.get('username'))
+                           stocks=stock_list, 
+                           selected_stock=None, 
+                           username=session.get('username'))
 
 @app.route('/predict', methods=['GET', 'POST'])
 def predict():
@@ -292,7 +281,7 @@ def predict():
                     future_input = np.append(future_input[0][1:], pred)
                 predictions_rescaled = scaler.inverse_transform(np.array(predictions_scaled).reshape(-1, 1))
                 prediction_dates = [(datetime.now() + timedelta(days=i+1)).strftime("%Y-%m-%d") 
-                                 for i in range(prediction_days)]
+                                     for i in range(prediction_days)]
                 predictions = list(zip(prediction_dates, predictions_rescaled.flatten()))
                 charts['prediction'] = create_prediction_chart(prediction_dates, predictions_rescaled)
 
@@ -535,13 +524,13 @@ def calculator():
             app.logger.error(f"Calculator error: {str(e)}")
     
     return render_template('calculator.html',
-                         username=session.get('username'),
-                         stock_list=stock_list,
-                         operations=operations,
-                         form=form,
-                         result=result,
-                         chart=chart,
-                         calculation_details=calculation_details)
+                           username=session.get('username'),
+                           stock_list=stock_list,
+                           operations=operations,
+                           form=form,
+                           result=result,
+                           chart=chart,
+                           calculation_details=calculation_details)
 
 @app.route('/debug/stocks')
 def debug_stocks():
@@ -554,13 +543,10 @@ def about():
 @app.route('/support')
 def support():
     return render_template('support.html', username=session.get('username'))
-  
 
 @app.route('/sitemap.xml')
 def sitemap():
     return send_from_directory('static', 'sitemap.xml')
-
-   
 
 @app.route('/robots.txt')
 def robots():
@@ -592,6 +578,5 @@ def logout():
     flash("Logged out successfully!", "success")
     return redirect(url_for('portfolio'))
 
-if __name__=="__main__":
-    app.run(host="0.0.0.0",port=5000, debug=True)
-
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)
